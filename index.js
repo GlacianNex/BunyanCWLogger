@@ -2,75 +2,112 @@
 
 const bunyan = require('bunyan');
 const createCWStream = require('bunyan-cloudwatch');
-const os = require('os');
 
 let loggerInstance = null;
 
 class BunyanCWLogger {
 
-  static init(logGroup, streamName, arn, fnName, fnRegion) {
-    let qualifier = '';
-    let hostname = os.hostname();
-    let name = fnName;
-    let region = (fnRegion || process.env.AWS_DEFAULT_REGION);
-    if (arn) {
-      hostname = arn;
-      qualifier = arn.split(':')[7] || 'none';
-      name = arn.split(':')[6];
-      region = arn.split(':')[3];
+  constructor(logGroup, streamName, arn) {
+    this.arn = arn;
+    this.logGroup = logGroup;
+    this.streamName = streamName;
+  }
+
+  static getInstance() {
+    if (!loggerInstance || loggerInstance === null) {
+      throw new Error('Logger is not initialized');
     }
+    return loggerInstance;
+  }
 
-    BunyanCWLogger.checkForMissingProperties([logGroup, streamName, name, region]);
+  build() {
+    this._validateInput();
+    this._populateProperties();
+    this._createCWStream();
+    this._createBunyanLogger();
+    this._setLoggerInstance();
+    this._addEndMethod();
+  }
 
-    const stream = createCWStream({
-      logGroupName: logGroup,
-      logStreamName: streamName,
-      cloudWatchLogsOptions: {
-        region,
-      },
-    });
+  _setLoggerInstance() {
+    loggerInstance = this.bunyanLogger;
+  }
 
-    loggerInstance = bunyan.createLogger({
-      name,
+  _createBunyanLogger() {
+    this.bunyanLogger = bunyan.createLogger({
+      name: this.name,
+      hostname: this.hostname,
       src: true,
-      level: BunyanCWLogger.selectLevel(),
-      hostname,
-      qualifier,
-      streams: [
-        {
-          stream,
-          type: 'raw',
-        },
-        {
-          stream: process.stdout,
-          level: BunyanCWLogger.selectLevel(),
-        },
+      level: this.logLevel,
+      node_env: process.env.NODE_ENV,
+      serializers: {
+        err: err => ({
+          name: err.name,
+          cause: err.message,
+        }),
+      },
+      streams: [{ stream: this.cwStream, type: 'raw' },
+        { stream: process.stdout, level: this.logLevel },
       ],
     });
   }
 
-  static selectLevel() {
-    let logLevel = bunyan.DEBUG;
+  _createCWStream() {
+    this.cwStream = createCWStream({
+      logGroupName: this.logGroup,
+      logStreamName: this.streamName,
+      cloudWatchLogsOptions: {
+        region: this.region,
+      },
+    });
+  }
+
+  _populateProperties() {
+    const arnArray = this.arn.split(':');
+    this.hostname = (arnArray[7] || 'none');
+    this.name = arnArray[6];
+    this.region = arnArray[3];
+
+    this.logLevel = bunyan.DEBUG;
     if (process.env.NODE_ENV === 'prod') {
-      logLevel = bunyan.INFO;
-    }
-    return logLevel;
-  }
-
-  static checkForMissingProperties(props) {
-    const expected = ['logGroup', 'streamName', 'fnName', 'fnRegion'];
-    for (let i = 0; i < expected.length; i += 1) {
-      if (!props[i]) {
-        throw new Error(`${expected[i]} attribute is missing`);
-      }
+      this.logLevel = bunyan.INFO;
     }
   }
 
-  static getInstance() {
-    if (loggerInstance) {
-      return loggerInstance;
+  _validateInput() {
+    if (!this.arn) {
+      throw Error('Unable to setup logger. No arn was supplied');
     }
-    throw new Error('Logger is not initialized');
+    const arnArray = this.arn.split(':');
+    if (arnArray.length < 7) {
+      throw Error('Invalid ARN');
+    }
+    if (!arnArray[6] || arnArray[6].length === 0) {
+      throw Error('ARN is missing function name');
+    }
+    if (!arnArray[3] || arnArray[3].length === 0) {
+      throw Error('ARN is missing region name');
+    }
+    if (!this.logGroup || this.logGroup.length === 0) {
+      throw Error('logGroup is missing');
+    }
+    if (!this.streamName || this.streamName.length === 0) {
+      throw Error('streamName is missing');
+    }
+  }
+
+  _addEndMethod() {
+    if (!loggerInstance || loggerInstance === null) {
+      throw new Error('Logger instance is not configured');
+    }
+
+    loggerInstance.end = (callback) => {
+      setInterval(() => {
+        if (this.cwStream.stream.writeQueued) {
+          callback();
+        }
+      }, 10);
+    };
   }
 }
 
