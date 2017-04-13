@@ -1,0 +1,38 @@
+{
+  "name": "bunyancwlogger",
+  "version": "1.0.0",
+  "description": "Wrapper for bunyan and bunyan-cloudwatch that simplifies logger configuration.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GlacianNex/BunyanCWLogger.git"
+  },
+  "keywords": [
+    "bunyan",
+    "bunyan-cloudwatch",
+    "cloudwatch",
+    "logging"
+  ],
+  "author": "Igor Chernyy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GlacianNex/BunyanCWLogger/issues"
+  },
+  "homepage": "https://github.com/GlacianNex/BunyanCWLogger#readme",
+  "dependencies": {
+    "bunyan": "^1.8.10",
+    "bunyan-cloudwatch": "^2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai" : "*",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.3"
+  }
+}
