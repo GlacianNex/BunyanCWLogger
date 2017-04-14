@@ -47,8 +47,8 @@ class BunyanCWLogger {
           cause: err.message,
         }),
       },
-      streams: [{ stream: this.cwStream, type: 'raw', closeOnExit: true },
-        { stream: process.stdout, level: this.logLevel, closeOnExit: true },
+      streams: [{ stream: this.cwStream, type: 'raw' },
+        { stream: process.stdout, level: this.logLevel },
       ],
     });
   }
@@ -98,6 +98,7 @@ class BunyanCWLogger {
   }
 
   static _addEndMethod() {
+    /*
     if (!loggerInstance || loggerInstance === null) {
       throw new Error('Logger instance is not configured');
     }
@@ -112,7 +113,7 @@ class BunyanCWLogger {
         }
       }, 10);
       return deferred.promise;
-    };
+    };*/
   }
 }
 
