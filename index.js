@@ -103,7 +103,7 @@ class BunyanCWLogger {
 
     loggerInstance.end = (callback) => {
       setInterval(() => {
-        if (!loggerInstance.streams[0].stream.writeQueued) {
+        if (loggerInstance && !loggerInstance.streams[0].stream.writeQueued) {
           loggerInstance = null;
           callback();
         }
