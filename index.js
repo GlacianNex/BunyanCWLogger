@@ -47,8 +47,8 @@ class BunyanCWLogger {
           cause: err.message,
         }),
       },
-      streams: [{ stream: this.cwStream, type: 'raw' },
-        { stream: process.stdout, level: this.logLevel },
+      streams: [{ stream: this.cwStream, type: 'raw', closeOnExit: true },
+        { stream: process.stdout, level: this.logLevel, closeOnExit: true },
       ],
     });
   }
@@ -106,6 +106,7 @@ class BunyanCWLogger {
       const deferred = Q.defer();
       setInterval(() => {
         if (loggerInstance && !loggerInstance.streams[0].stream.writeQueued) {
+          loggerInstance.streams[0].stream.end();
           loggerInstance = null;
           deferred.resolve();
         }
