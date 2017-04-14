@@ -23,6 +23,7 @@ describe('addEndMethod', () => {
   it('verify setInterval', (done) => {
     new BunyanCWLogger('test', 'test', 'arn:aws:lambda:us-east-1:local:function:testFn:qualifier').build();
     const logger = BunyanCWLogger.getInstance();
-    logger.end(done);
+    logger.end()
+    .then(() => done());
   });
 });
