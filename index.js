@@ -2,6 +2,7 @@
 
 const bunyan = require('bunyan');
 const createCWStream = require('bunyan-cloudwatch');
+const Q = require('q');
 
 let loggerInstance = null;
 
@@ -101,13 +102,15 @@ class BunyanCWLogger {
       throw new Error('Logger instance is not configured');
     }
 
-    loggerInstance.end = (callback) => {
+    loggerInstance.end = () => {
+      const deferred = Q.defer();
       setInterval(() => {
         if (loggerInstance && !loggerInstance.streams[0].stream.writeQueued) {
           loggerInstance = null;
-          callback();
+          deferred.resolve();
         }
       }, 10);
+      return deferred.promise;
     };
   }
 }
