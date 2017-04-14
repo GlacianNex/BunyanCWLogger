@@ -26,7 +26,7 @@ class BunyanCWLogger {
     this._createCWStream();
     this._createBunyanLogger();
     this._setLoggerInstance();
-    this._addEndMethod();
+    BunyanCWLogger._addEndMethod();
   }
 
   _setLoggerInstance() {
@@ -96,14 +96,15 @@ class BunyanCWLogger {
     }
   }
 
-  _addEndMethod() {
+  static _addEndMethod() {
     if (!loggerInstance || loggerInstance === null) {
       throw new Error('Logger instance is not configured');
     }
 
     loggerInstance.end = (callback) => {
       setInterval(() => {
-        if (this.cwStream.stream.writeQueued) {
+        if (!loggerInstance.streams[0].stream.writeQueued) {
+          loggerInstance = null;
           callback();
         }
       }, 10);

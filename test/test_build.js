@@ -17,7 +17,7 @@ describe('build', () => {
     const crCWStreamStub = sinon.stub(bl, '_createCWStream');
     const crBunyanStub = sinon.stub(bl, '_createBunyanLogger');
     const setLoggerInstanceStub = sinon.stub(bl, '_setLoggerInstance');
-    const addEndMethodStub = sinon.stub(bl, '_addEndMethod');
+    const addEndMethodStub = sinon.stub(BunyanCWLogger, '_addEndMethod');
 
     bl.build();
 
