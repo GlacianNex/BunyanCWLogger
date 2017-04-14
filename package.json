@@ -1,6 +1,6 @@
 {
   "name": "bunyancwlogger",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Wrapper for bunyan and bunyan-cloudwatch that simplifies logger configuration.",
   "main": "index.js",
   "scripts": {
