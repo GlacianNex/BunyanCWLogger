@@ -18,8 +18,22 @@ Library permits you to specify the following attributes:
 * streamName - name of the stream you want this log to go to (required)
 * arn - ARN of the lambda that wants to send data to CloudWatch (required)
 
-### Flush logs
-It important that before you terminate your lambda you wait for all logs to be sent to cloudwatch. In order to do make this easy there is an `end()` method. Method returns a promise that will resolve once all logs have been sent.
+### Logging Information
+
+The logs will be sent in the JSON format and will have the following content default:
+* name - **lambda name** (from ARN)
+* hostname - **lambda qualifier** (from ARN)
+* node_env - **node environment setting**
+* level - **logging level** The level is set based on environment. INFO in prod, DEBUG everywhere else.
+
+*Sample Logs:*
+
+``` json
+{"name":"fnName","hostname":"dev","node_env":"dev","pid":1,"level":30,"data":{"hello":"world", 
+"msg": "Sample log message", "src": { "file": "/var/task/resources/index.js", "line": 30 }, "v": 0}
+```
+
+
 
 
 ### Example
@@ -30,15 +44,6 @@ exports.handler = (event, context, callback) => {
      const logger = BunyanCWLogger.getInstance();
 
      logger.info({hello: 'world'}, 'Thest message');
-     logger.end().then(() => callback());
+     callback();
 }
 ```
-
-### Logging Information
-
-The logs will be sent in the JSON format and will have the following content default:
-* name - **lambda name** (from ARN)
-* hostname - **lambda qualifier** (from ARN)
-* node_env - **node environment setting**
-* level - **logging level** The level is set based on environment. INFO in prod, DEBUG everywhere else.
-
