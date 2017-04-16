@@ -27,7 +27,6 @@ class BunyanCWLogger {
     this._createCWStream();
     this._createBunyanLogger();
     this._setLoggerInstance();
-    BunyanCWLogger._addEndMethod();
   }
 
   _setLoggerInstance() {
@@ -95,25 +94,6 @@ class BunyanCWLogger {
     if (!this.streamName || this.streamName.length === 0) {
       throw Error('streamName is missing');
     }
-  }
-
-  static _addEndMethod() {
-    /*
-    if (!loggerInstance || loggerInstance === null) {
-      throw new Error('Logger instance is not configured');
-    }
-
-    loggerInstance.end = () => {
-      const deferred = Q.defer();
-      setInterval(() => {
-        if (loggerInstance && !loggerInstance.streams[0].stream.writeQueued) {
-          loggerInstance.streams[0].stream.end();
-          loggerInstance = null;
-          deferred.resolve();
-        }
-      }, 10);
-      return deferred.promise;
-    };*/
   }
 }
 
